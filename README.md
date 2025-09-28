@@ -198,14 +198,50 @@ screen -ls
 
 screen -S flask_app -X quit
 
+# Testing
+
+Test locally on the EC2 server
+
+Use curl to test the endpoints:
+
+Staging app
+curl http://127.0.0.1:5000
+
+Production app
+curl http://127.0.0.1:8000
+
+
+You should get your Flask app’s HTML or API response.
+
+Test externally (from your machine)
+
+Make sure security groups allow inbound traffic on ports 5000 (staging) and 8000 (production).
+
+Use your EC2 public IP or DNS:
+
+# Staging
+curl http://<EC2_PUBLIC_IP>:5000
+
+# Production
+curl http://<EC2_PUBLIC_IP>:8000
+
+
+Or open in a browser:
+
+http://<EC2_PUBLIC_IP>:5000  → staging
+http://<EC2_PUBLIC_IP>:8000  → production
+
+
 ---
-Screenshots:
+# Screenshots:
 
 triggering the github actions deploy and main branch and deployment of staging and main branch in ec2 server. 
 
 <img width="1912" height="887" alt="triggering main branch and build test" src="https://github.com/user-attachments/assets/9bae564b-a6a5-4ac8-8225-32608cc8ccb4" />
 
 <img width="1918" height="872" alt="prod deploy" src="https://github.com/user-attachments/assets/6b1a44f8-3f5f-4d27-91aa-2d5b457842a3" />
+
+<img width="1918" height="882" alt="Screenshot 2025-09-29 020141" src="https://github.com/user-attachments/assets/693f1125-3676-4999-b283-66a411f5e424" />
 
 <img width="1917" height="1015" alt="changes reflected on main ec2 machine" src="https://github.com/user-attachments/assets/5b0f196d-2de7-43f1-b5ce-2d487748a4c5" />
 
@@ -216,6 +252,8 @@ triggering the github actions deploy and main branch and deployment of staging a
 <img width="1452" height="193" alt="running flask on ec2 machine port 5000" src="https://github.com/user-attachments/assets/cc37e1dc-0fba-49eb-bce3-6c15e6618e2b" />
 
 <img width="1892" height="340" alt="running flask on port 8000 deploy main" src="https://github.com/user-attachments/assets/b0b7b80b-e25e-401d-8818-eba12fba9024" />
+
+
 
 ---
 Author: Rahul Sharma
