@@ -24,7 +24,7 @@ jobs:
         run: pip install -r Myapp/requirements.txt
 
       - name: Run tests
-        run: pytest testapp.py --maxfail=1 --disable-warnings -q
+        run: pytest Myapp/ --maxfail=1 --disable-warnings -q
 
   deploy-staging:
     if: github.ref == 'refs/heads/staging'
