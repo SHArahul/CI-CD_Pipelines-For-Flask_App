@@ -12,7 +12,7 @@ jobs:
   build-test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Set up Python
@@ -20,14 +20,11 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Install Dependencies
+      - name: Install dependencies
         run: pip install -r Myapp/requirements.txt
 
-      - name: Run Tests
+      - name: Run tests
         run: pytest testapp.py --maxfail=1 --disable-warnings -q
-
-      - name: Build Application
-        run: echo "Build step (placeholder for packaging or docker build)"
 
   deploy-staging:
     if: github.ref == 'refs/heads/staging'
@@ -46,7 +43,8 @@ jobs:
             git checkout staging
             git pull origin staging
             pip3 install -r Myapp/requirements.txt
-            sudo systemctl restart flaskapp-staging
+            pkill -f "python3 app.py" || true
+            PORT=5000 nohup python3 app.py > flask-staging.log 2>&1 &
 
   deploy-production:
     if: github.event_name == 'release'
@@ -65,4 +63,5 @@ jobs:
             git checkout main
             git pull origin main
             pip3 install -r Myapp/requirements.txt
-            sudo systemctl restart flaskapp
+            pkill -f "python3 app.py" || true
+            PORT=8000 nohup python3 app.py > flask-production.log 2>&1 &
