@@ -1,0 +1,68 @@
+name: Flask CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - staging
+  release:
+    types: [created]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: pip install -r Myapp/requirements.txt
+
+      - name: Run Tests
+        run: pytest testapp.py --maxfail=1 --disable-warnings -q
+
+      - name: Build Application
+        run: echo "Build step (placeholder for packaging or docker build)"
+
+  deploy-staging:
+    if: github.ref == 'refs/heads/staging'
+    needs: build-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Staging (Port 5000)
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd ~/CI-CD_Pipelines-For-Flask_App
+            git fetch --all
+            git checkout staging
+            git pull origin staging
+            pip3 install -r Myapp/requirements.txt
+            sudo systemctl restart flaskapp-staging
+
+  deploy-production:
+    if: github.event_name == 'release'
+    needs: build-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Production (Port 8000)
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd ~/CI-CD_Pipelines-For-Flask_App
+            git fetch --all
+            git checkout main
+            git pull origin main
+            pip3 install -r Myapp/requirements.txt
+            sudo systemctl restart flaskapp
