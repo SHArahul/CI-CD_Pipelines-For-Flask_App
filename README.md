@@ -42,17 +42,25 @@ Process Management: Runs the Flask application in detached screen sessions for c
 # Repository Structure
 
 CI-CD_Pipelines-For-Flask_App/
+
 │
+
 ├── Myapp/                     # Flask application code
+
 │   ├── app.py                 # Main Flask application
+
 │   ├── requirements.txt       # Python dependencies
+
 │   └── ...                    # Additional application files
-│
+
 ├── .github/
+
 │   └── workflows/
+
 │       └── ci-cd.yml          # GitHub Actions CI/CD pipeline
-│
+
 ├── Jenkinsfile                # Jenkins CI/CD pipeline script
+
 ├── README.md                  # Project documentation
 
 
