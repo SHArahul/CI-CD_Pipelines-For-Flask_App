@@ -44,7 +44,7 @@ jobs:
             git pull origin staging
             pip3 install -r Myapp/requirements.txt
             pkill -f "python3 app.py" || true
-            PORT=5000 nohup python3 app.py > flask-staging.log 2>&1 &
+            PORT=5000 ENV=dev nohup python3 Myapp/app.py > flask-staging.log 2>&1 &
 
   deploy-production:
     if: github.event_name == 'release'
@@ -64,4 +64,4 @@ jobs:
             git pull origin main
             pip3 install -r Myapp/requirements.txt
             pkill -f "python3 app.py" || true
-            PORT=8000 nohup python3 app.py > flask-production.log 2>&1 &
+            PORT=8000 ENV=production nohup python3 Myapp/app.py > flask-production.log 2>&1 &
