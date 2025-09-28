@@ -21,10 +21,16 @@ jobs:
           python-version: '3.10'
 
       - name: Install dependencies
-        run: pip install -r Myapp/requirements.txt
+        run: |
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r Myapp/requirements.txt
 
       - name: Run tests
-        run: pytest Myapp/ --maxfail=1 --disable-warnings -q
+        run: |
+          source venv/bin/activate
+          pytest Myapp/ --maxfail=1 --disable-warnings -q
 
   deploy-staging:
     if: github.ref == 'refs/heads/staging'
@@ -38,16 +44,31 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd ~/CI-CD_Pipelines-For-Flask_App
+            cd ~
+            if [ ! -d "CI-CD_Pipelines-For-Flask_App" ]; then
+              git clone https://github.com/SHArahul/CI-CD_Pipelines-For-Flask_App.git
+            fi
+            cd CI-CD_Pipelines-For-Flask_App
             git fetch --all
             git checkout staging
             git pull origin staging
-            pip3 install -r Myapp/requirements.txt
+
+            # Setup virtual environment
+            if [ ! -d "venv" ]; then
+              python3 -m venv venv
+            fi
+            source venv/bin/activate
+            pip install --upgrade pip
+            pip install -r Myapp/requirements.txt
+
+            # Stop any running Flask app
             pkill -f "python3 app.py" || true
-            PORT=5000 ENV=dev nohup python3 Myapp/app.py > flask-staging.log 2>&1 &
+
+            # Run Flask app in background
+            PORT=5000 ENV=dev nohup venv/bin/python Myapp/app.py > flask-staging.log 2>&1 &
 
   deploy-production:
-    if: github.event_name == 'release'
+    if: github.ref == 'refs/heads/main'
     needs: build-test
     runs-on: ubuntu-latest
     steps:
@@ -58,10 +79,25 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd ~/CI-CD_Pipelines-For-Flask_App
+            cd ~
+            if [ ! -d "CI-CD_Pipelines-For-Flask_App" ]; then
+              git clone https://github.com/SHArahul/CI-CD_Pipelines-For-Flask_App.git
+            fi
+            cd CI-CD_Pipelines-For-Flask_App
             git fetch --all
             git checkout main
             git pull origin main
-            pip3 install -r Myapp/requirements.txt
+
+            # Setup virtual environment
+            if [ ! -d "venv" ]; then
+              python3 -m venv venv
+            fi
+            source venv/bin/activate
+            pip install --upgrade pip
+            pip install -r Myapp/requirements.txt
+
+            # Stop any running Flask app
             pkill -f "python3 app.py" || true
-            PORT=8000 ENV=production nohup python3 Myapp/app.py > flask-production.log 2>&1 &
+
+            # Run Flask app in background
+            PORT=8000 ENV=production nohup venv/bin/python Myapp/app.py > flask-production.log 2>&1 &
