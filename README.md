@@ -1,26 +1,27 @@
-## CI/CD Pipelines for Flask Application
+# CI/CD Pipelines for Flask Application
+---
 
 This repository demonstrates the implementation of Continuous Integration and Continuous Deployment (CI/CD) pipelines for a Flask application using both GitHub Actions and Jenkins. The pipelines automate the deployment process to an Ubuntu EC2 instance, ensuring efficient and reliable application delivery.
 
+---
+
 # Table of Contents
 
-# Project Overview
+Project Overview
 
-# Repository Structure
+Repository Structure
 
-# Prerequisites
+Prerequisites
 
-# GitHub Actions CI/CD Pipeline
+GitHub Actions CI/CD Pipeline
 
-# Jenkins CI/CD Pipeline
+Jenkins CI/CD Pipeline
 
-# Deployment Details
+Deployment Details
 
-# Usage
+Usage
 
-# Logs & Monitoring
-
-# Contributing
+Logs & Monitoring
 
 ---
 
