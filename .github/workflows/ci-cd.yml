@@ -38,16 +38,34 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd ~/CI-CD_Pipelines-For-Flask_App
+            sudo apt update
+            sudo apt install -y screen python3-venv python3-pip git
+
+            cd ~/CI-CD_Pipelines-For-Flask_App || exit 1
             git fetch --all
             git checkout staging
             git pull origin staging
-            pip3 install -r Myapp/requirements.txt
-            pkill -f "python3 app.py" || true
-            PORT=5000 ENV=dev nohup python3 Myapp/app.py > flask-staging.log 2>&1 &
+
+            # Create or reuse persistent venv
+            if [ ! -d "$HOME/flask_venv" ]; then
+              python3 -m venv $HOME/flask_venv --upgrade-deps
+            fi
+            source $HOME/flask_venv/bin/activate
+
+            pip install --upgrade pip
+            pip install -r Myapp/requirements.txt
+
+            # Cleanup old Flask screen session and logs
+            if screen -list | grep -q "flask_staging"; then
+              screen -S flask_staging -X quit
+            fi
+            rm -f ~/flask-staging.log
+
+            # Start new Flask session in background
+            screen -dmS flask_staging bash -c "source $HOME/flask_venv/bin/activate && PORT=5000 ENV=dev python Myapp/app.py"
 
   deploy-production:
-    if: github.event_name == 'release'
+    if: github.ref == 'refs/heads/main' || github.event_name == 'release'
     needs: build-test
     runs-on: ubuntu-latest
     steps:
@@ -58,10 +76,27 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd ~/CI-CD_Pipelines-For-Flask_App
+            sudo apt update
+            sudo apt install -y screen python3-venv python3-pip git
+
+            cd ~/CI-CD_Pipelines-For-Flask_App || exit 1
             git fetch --all
             git checkout main
             git pull origin main
-            pip3 install -r Myapp/requirements.txt
-            pkill -f "python3 app.py" || true
-            PORT=8000 ENV=production nohup python3 Myapp/app.py > flask-production.log 2>&1 &
+
+            if [ ! -d "$HOME/flask_venv" ]; then
+              python3 -m venv $HOME/flask_venv --upgrade-deps
+            fi
+            source $HOME/flask_venv/bin/activate
+
+            pip install --upgrade pip
+            pip install -r Myapp/requirements.txt
+
+            # Cleanup old Flask screen session and logs
+            if screen -list | grep -q "flask_production"; then
+              screen -S flask_production -X quit
+            fi
+            rm -f ~/flask-production.log
+
+            # Start new Flask session in background
+            screen -dmS flask_production bash -c "source $HOME/flask_venv/bin/activate && PORT=8000 ENV=production python Myapp/app.py"
